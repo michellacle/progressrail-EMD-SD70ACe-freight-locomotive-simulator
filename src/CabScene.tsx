@@ -1,4 +1,4 @@
-import { Activity, ArrowLeftRight, ArrowUpRight, CircleStop, Power, ToggleLeft, Zap } from 'lucide-react'
+import { Activity, Info, Zap } from 'lucide-react'
 import type { DemoControlId, LessonState } from './lessonMachine'
 
 type OperatingState = Pick<LessonState, 'fuelPumpOn' | 'engineRunOn' | 'engineRunning' | 'brakeReleased' | 'direction' | 'throttleApplied'>
@@ -21,6 +21,7 @@ type CabSceneProps = {
   motion: 'stopped' | 'moving'
   operatingState: OperatingState
   onControl: (controlId: DemoControlId) => void
+  onControlHelp: (controlId: DemoControlId) => void
 }
 
 const controlPanels: ControlPanel[] = [
@@ -56,20 +57,6 @@ const controlPanels: ControlPanel[] = [
     ],
   },
 ]
-
-const controlIcons = {
-  'control-fuel-pump': Power,
-  'engine-run': Power,
-  'engine-start': Zap,
-  'brake-handle': CircleStop,
-  reverser: ArrowLeftRight,
-  throttle: ArrowUpRight,
-  'gen-field': ToggleLeft,
-  'dynamic-brake-control': ToggleLeft,
-  isolation: ArrowLeftRight,
-  'dynamic-brake': ArrowUpRight,
-  'independent-brake': CircleStop,
-} satisfies Record<DemoControlId, typeof Power>
 
 function controlPosition(controlId: DemoControlId, state: OperatingState) {
   if (controlId === 'control-fuel-pump') return state.fuelPumpOn ? 'ON' : 'OFF'
@@ -127,43 +114,43 @@ function ControlMechanism({ control, operatingState }: { control: CabControl; op
 function FactoryWindow({ doorOpen, moving }: { doorOpen: boolean; moving: boolean }) {
   return (
     <svg className={`factory-art ${moving ? 'is-moving' : ''}`} viewBox="0 0 1120 330" role="img" aria-label={`Operator's view through one factory bay. The bay door is ${doorOpen ? 'open' : 'closed'}.`} preserveAspectRatio="xMidYMid slice">
-      <rect width="1120" height="330" fill="#33423b" />
-      <path d="M0 0h1120v47H0z" fill="#26362f" />
-      <path d="M0 24h1120M80 0l82 47m162-47 82 47m162-47 82 47m162-47 82 47m162-47 82 47" stroke="#56645b" strokeWidth="5" />
-      <path d="M0 47h1120v35H0z" fill="#526159" />
-      <path d="M0 82h1120v168H0z" fill="#68766e" />
-      <rect x="188" y="63" width="744" height="187" fill="#263831" />
-      <rect x="215" y="76" width="690" height="162" fill="#aebbb3" />
-      <rect x="215" y="76" width="690" height="88" fill="#b6c2bc" />
-      <path d="M215 163h690v27H215z" fill="#84968b" />
-      <path d="M215 190h690v48H215z" fill="#8a938c" />
-      <path d="M215 190c100-22 158 10 238-2 86-13 139-22 225-1 67 16 131 15 227-1v31H215z" fill="#576e5a" />
-      <path d="M215 238h690v92H215z" fill="#73766d" />
-      <path d="M536 190 400 330h320L584 190z" fill="#66665d" />
-      <g className="track-ties" stroke="#45443d" strokeWidth="8">
+      <rect width="1120" height="330" fill="#343431" />
+      <path d="M0 0h1120v47H0z" fill="#242422" />
+      <path d="M0 24h1120M80 0l82 47m162-47 82 47m162-47 82 47m162-47 82 47m162-47 82 47" stroke="#5d5b54" strokeWidth="5" />
+      <path d="M0 47h1120v35H0z" fill="#77746a" />
+      <path d="M0 82h1120v168H0z" fill="#99978f" />
+      <rect x="188" y="63" width="744" height="187" fill="#292927" />
+      <rect x="215" y="76" width="690" height="162" fill="#bdc0b9" />
+      <rect x="215" y="76" width="690" height="88" fill="#c9cbc5" />
+      <path d="M215 163h690v27H215z" fill="#95958d" />
+      <path d="M215 190h690v48H215z" fill="#77766e" />
+      <path d="M215 190c100-22 158 10 238-2 86-13 139-22 225-1 67 16 131 15 227-1v31H215z" fill="#6b7651" />
+      <path d="M215 238h690v92H215z" fill="#77766e" />
+      <path d="M536 190 400 330h320L584 190z" fill="#68675f" />
+      <g className="track-ties" stroke="#4b4943" strokeWidth="8">
         <path d="M534 196h52M510 205h100M490 215h140M465 226h190M437 239h246M405 255h310M368 276h384M327 301h466" />
       </g>
-      <path d="M536 190 400 330M584 190 720 330" stroke="#272c27" strokeWidth="5" />
-      <path d="M188 63h744v16H188zM188 238h744v12H188zM188 63v187h19V63m737 0v187h-19V63" fill="#d0d0c3" />
+      <path d="M536 190 400 330M584 190 720 330" stroke="#292927" strokeWidth="5" />
+      <path d="M188 63h744v16H188zM188 238h744v12H188zM188 63v187h19V63m737 0v187h-19V63" fill="#d2cfc4" />
       <g className={`factory-door ${doorOpen ? 'open' : ''}`}>
         <g className="factory-door-leaf">
-          <rect x="218" y="79" width="684" height="156" fill="#afb7ac" />
-          <path d="M218 98h684m-684 19h684m-684 19h684m-684 19h684m-684 19h684m-684 19h684m-684 19h684" stroke="#828d82" strokeWidth="3" />
-          <path d="M246 79v156m628-156v156" stroke="#879187" strokeWidth="3" />
+          <rect x="218" y="79" width="684" height="156" fill="#b4b4ac" />
+          <path d="M218 98h684m-684 19h684m-684 19h684m-684 19h684m-684 19h684m-684 19h684m-684 19h684" stroke="#85837a" strokeWidth="3" />
+          <path d="M246 79v156m628-156v156" stroke="#8c8a80" strokeWidth="3" />
         </g>
       </g>
-      <rect x="0" y="250" width="188" height="80" fill="#47564f" />
-      <rect x="932" y="250" width="188" height="80" fill="#47564f" />
-      <path d="M28 0v330m1064-330v330" stroke="#758178" strokeWidth="12" />
-      <circle cx="148" cy="95" r="6" fill="#d9ec9b" />
-      <circle cx="972" cy="95" r="6" fill="#d9ec9b" />
-      <text x="48" y="120" fill="#e0e3d8" fontFamily="monospace" fontSize="11" letterSpacing="1">BAY 04</text>
-      <text x="956" y="120" fill="#e0e3d8" fontFamily="monospace" fontSize="11" letterSpacing="1">EXIT</text>
+      <rect x="0" y="250" width="188" height="80" fill="#57564f" />
+      <rect x="932" y="250" width="188" height="80" fill="#57564f" />
+      <path d="M28 0v330m1064-330v330" stroke="#89867c" strokeWidth="12" />
+      <circle cx="148" cy="95" r="6" fill="#ffcd11" />
+      <circle cx="972" cy="95" r="6" fill="#ffcd11" />
+      <text x="48" y="120" fill="#f0eee6" fontFamily="monospace" fontSize="11" letterSpacing="1">BAY 04</text>
+      <text x="956" y="120" fill="#f0eee6" fontFamily="monospace" fontSize="11" letterSpacing="1">EXIT</text>
     </svg>
   )
 }
 
-function CabScene({ completedControlIds, currentControlId, disabled, motion, operatingState, onControl }: CabSceneProps) {
+function CabScene({ completedControlIds, currentControlId, disabled, motion, operatingState, onControl, onControlHelp }: CabSceneProps) {
   return (
     <div className="cab-scene">
       <div className="cab-toolbar">
@@ -214,23 +201,32 @@ function CabScene({ completedControlIds, currentControlId, disabled, motion, ope
               <div className="panel-heading"><span>{panel.title}</span></div>
               <div className="panel-controls">
                 {panel.controls.map((control) => {
-                  const Icon = controlIcons[control.controlId]
                   const isCurrent = currentControlId === control.controlId
                   const isComplete = completedControlIds.includes(control.controlId)
                   return (
-                    <button
-                      className={`cab-control ${control.kind}${isCurrent ? ' is-current' : ''}${isComplete ? ' is-complete' : ''}`}
-                      type="button"
-                      key={control.controlId}
-                      disabled={disabled}
-                      onClick={() => onControl(control.controlId)}
-                      aria-label={`${control.label}, ${controlPosition(control.controlId, operatingState)}${isCurrent ? ', highlighted for the current step' : ''}`}
-                      aria-current={isCurrent ? 'step' : undefined}
-                    >
-                      <span className="cab-control-top"><span>{control.label}</span><Icon size={14} strokeWidth={1.8} /></span>
-                      <span className="control-mechanism"><ControlMechanism control={control} operatingState={operatingState} /></span>
-                      <span className="control-position"><i className={isComplete ? 'position-on' : ''} />{isComplete ? 'OPERATED / DEMO' : controlPosition(control.controlId, operatingState)}</span>
-                    </button>
+                    <div className="cab-control-row" key={control.controlId}>
+                      <button
+                        className={`cab-control ${control.kind}${isCurrent ? ' is-current' : ''}${isComplete ? ' is-complete' : ''}`}
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => onControl(control.controlId)}
+                        aria-label={`${control.label}, ${controlPosition(control.controlId, operatingState)}${isCurrent ? ', highlighted for the current step' : ''}`}
+                        aria-current={isCurrent ? 'step' : undefined}
+                      >
+                        <span className="cab-control-top"><span>{control.label}</span></span>
+                        <span className="control-mechanism"><ControlMechanism control={control} operatingState={operatingState} /></span>
+                        <span className="control-position"><i className={isComplete ? 'position-on' : ''} />{isComplete ? 'OPERATED / DEMO' : controlPosition(control.controlId, operatingState)}</span>
+                      </button>
+                      <button
+                        className="control-help-action"
+                        type="button"
+                        title={`What does ${control.label} do?`}
+                        aria-label={`Explain ${control.label}`}
+                        onClick={() => onControlHelp(control.controlId)}
+                      >
+                        <Info size={15} aria-hidden="true" />
+                      </button>
+                    </div>
                   )
                 })}
               </div>

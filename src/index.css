@@ -1,22 +1,22 @@
 :root {
   font-family: 'IBM Plex Sans', sans-serif;
-  color: #202a26;
-  background: #e7eae4;
+  color: #1d1d1b;
+  background: #d7d5ce;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-optical-sizing: auto;
   font-weight: 400;
-  --paper: #f4f4ed;
-  --canvas: #e7eae4;
-  --ink: #202a26;
-  --muted: #6f7a73;
-  --line: #c9d0c8;
-  --forest: #244b40;
-  --forest-deep: #1d342e;
-  --signal: #d9ec9b;
-  --copper: #bd6b50;
+  --paper: #f4f2eb;
+  --canvas: #d7d5ce;
+  --ink: #1d1d1b;
+  --muted: #6c6a62;
+  --line: #b7b4ab;
+  --forest: #232321;
+  --forest-deep: #151514;
+  --signal: #ffcd11;
+  --copper: #c45b38;
   --mono: 'IBM Plex Mono', monospace;
 }
 
@@ -27,17 +27,17 @@ body {
   min-height: 100vh;
   margin: 0;
   background-color: var(--canvas);
-  background-image: radial-gradient(#cfd5cd 0.65px, transparent 0.65px);
+  background-image: radial-gradient(#c0beb6 0.65px, transparent 0.65px);
   background-size: 14px 14px;
 }
 
 button, a { font: inherit; }
 
 button:focus-visible, a:focus-visible {
-  outline: 3px solid #9dbb5b;
+  outline: 3px solid #e6ad00;
   outline-offset: 3px;
 }
 
 button:disabled { cursor: not-allowed; }
 
-::selection { color: #15241d; background: #d9ec9b; }
+::selection { color: #1d1d1b; background: #ffcd11; }

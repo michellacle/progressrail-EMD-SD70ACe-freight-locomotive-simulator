@@ -1,13 +1,16 @@
 import { Activity, ArrowRight, CircleAlert, CircleCheck, Info, Pause, Play, RotateCcw, TrainFront } from 'lucide-react'
-import { useReducer } from 'react'
+import { useReducer, useState } from 'react'
 import './App.css'
 import CabScene from './CabScene'
+import { controlHelp } from './controlHelp'
 import { createInitialLessonState, demoSteps, reduceLesson } from './lessonMachine'
 
 function App() {
   const [lesson, dispatch] = useReducer(reduceLesson, createInitialLessonState())
+  const [helpControlId, setHelpControlId] = useState<keyof typeof controlHelp | null>(null)
   const currentStep = demoSteps[lesson.stepIndex]
   const displayedStep = lesson.reviewedStepIndex === null ? currentStep : demoSteps[lesson.reviewedStepIndex]
+  const selectedControlHelp = helpControlId === null ? null : controlHelp[helpControlId]
   const completedControlIds = lesson.history.map((stepIndex) => demoSteps[stepIndex].controlId)
   const progress = Math.round((lesson.history.length / demoSteps.length) * 100)
 
@@ -66,6 +69,7 @@ function App() {
                 throttleApplied: lesson.throttleApplied,
               }}
               onControl={(controlId) => dispatch({ type: 'interact', controlId })}
+              onControlHelp={setHelpControlId}
             />
 
             <div className="readout-strip" aria-label="Demonstration state">
@@ -113,6 +117,23 @@ function App() {
                 ? 'Begin the operating demo from the cab controls. Exact SD70ACe steps are awaiting manual review.'
                 : displayedStep?.instruction ?? 'The illustrative movement has stopped. No operating steps were validated.'}</p>
             </div>
+
+            {selectedControlHelp && (
+              <section className="control-help-panel" aria-labelledby="control-help-title" aria-live="polite">
+                <div className="control-help-header">
+                  <div>
+                    <p className="eyebrow">CONTROL GUIDE</p>
+                    <h3 id="control-help-title">{selectedControlHelp.title}</h3>
+                  </div>
+                  <button className="control-help-close" type="button" onClick={() => setHelpControlId(null)} aria-label="Close control explanation" title="Close explanation">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
+                <p>{selectedControlHelp.purpose}</p>
+                <p>{selectedControlHelp.context}</p>
+                <div className="control-help-model-note"><Info size={14} aria-hidden="true" /><span>{selectedControlHelp.modelNote}</span></div>
+              </section>
+            )}
 
             <div className={`feedback-line ${lesson.mistakes > 0 && lesson.feedback.startsWith('Use') ? 'warning' : ''}`} role="status">
               {lesson.mistakes > 0 && lesson.feedback.startsWith('Use')
