@@ -1,7 +1,16 @@
 import { Activity, Info, Zap } from 'lucide-react'
-import type { DemoControlId, LessonState } from './lessonMachine'
+import type { DemoControlId } from './lessonMachine'
 
-type OperatingState = Pick<LessonState, 'fuelPumpOn' | 'engineRunOn' | 'engineRunning' | 'brakeReleased' | 'direction' | 'throttleApplied'>
+type OperatingState = {
+  fuelPumpOn: boolean
+  engineRunOn: boolean
+  engineRunning: boolean
+  brakeReleased: boolean
+  direction: 'neutral' | 'forward'
+  throttleApplied: boolean
+  throttlePercent: number
+  automaticBrakePercent: number
+}
 
 type CabControl = {
   controlId: DemoControlId
@@ -18,10 +27,15 @@ type CabSceneProps = {
   completedControlIds: DemoControlId[]
   currentControlId: DemoControlId | null
   disabled: boolean
+  factoryDoorOpen: boolean
   motion: 'stopped' | 'moving'
   operatingState: OperatingState
+  throttleEnabled: boolean
+  brakeEnabled: boolean
   onControl: (controlId: DemoControlId) => void
   onControlHelp: (controlId: DemoControlId) => void
+  onThrottleChange: (value: number) => void
+  onAutomaticBrakeChange: (value: number) => void
 }
 
 const controlPanels: ControlPanel[] = [
@@ -62,9 +76,9 @@ function controlPosition(controlId: DemoControlId, state: OperatingState) {
   if (controlId === 'control-fuel-pump') return state.fuelPumpOn ? 'ON' : 'OFF'
   if (controlId === 'engine-run') return state.engineRunOn ? 'ON' : 'OFF'
   if (controlId === 'engine-start') return state.engineRunning ? 'RUNNING' : 'PUSH TO START'
-  if (controlId === 'brake-handle') return state.brakeReleased ? 'RELEASED / DEMO' : 'APPLIED / DEMO'
+  if (controlId === 'brake-handle') return state.automaticBrakePercent <= 10 ? 'RELEASED / DEMO' : state.automaticBrakePercent >= 75 ? 'FULL APPLY / DEMO' : 'BRAKE / DEMO'
   if (controlId === 'reverser') return state.direction.toUpperCase()
-  if (controlId === 'throttle') return state.throttleApplied ? 'POWER / DEMO' : 'IDLE'
+  if (controlId === 'throttle') return state.throttlePercent === 0 ? 'IDLE / DEMO' : state.throttlePercent < 35 ? 'LOW / DEMO' : state.throttlePercent < 70 ? 'MID / DEMO' : 'HIGH / DEMO'
   if (controlId === 'dynamic-brake-control') return 'CLOSED'
   if (controlId === 'gen-field') return 'OFF'
   if (controlId === 'isolation') return 'START / STOP / ISOLATE'
@@ -72,7 +86,16 @@ function controlPosition(controlId: DemoControlId, state: OperatingState) {
   return 'HANDLE'
 }
 
-function ControlMechanism({ control, operatingState }: { control: CabControl; operatingState: OperatingState }) {
+type ControlMechanismProps = {
+  control: CabControl
+  operatingState: OperatingState
+  throttleEnabled: boolean
+  brakeEnabled: boolean
+  onThrottleChange: (value: number) => void
+  onAutomaticBrakeChange: (value: number) => void
+}
+
+function ControlMechanism({ control, operatingState, throttleEnabled, brakeEnabled, onThrottleChange, onAutomaticBrakeChange }: ControlMechanismProps) {
   const position = controlPosition(control.controlId, operatingState)
 
   if (control.kind === 'pushbutton') {
@@ -99,12 +122,53 @@ function ControlMechanism({ control, operatingState }: { control: CabControl; op
     )
   }
 
-  const brakeControl = control.controlId === 'brake-handle'
+  if (control.controlId === 'throttle') {
+    return (
+      <span className="mechanism-slider throttle-slider">
+        <span className="slider-captions"><b>IDLE</b><b>POWER</b></span>
+        <input
+          className="handle-range throttle-range"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value={operatingState.throttlePercent}
+          disabled={!throttleEnabled}
+          aria-label="Throttle demo setting"
+          aria-valuetext={controlPosition('throttle', operatingState)}
+          onChange={(event) => onThrottleChange(Number(event.currentTarget.value))}
+        />
+        <span className="slider-state">{controlPosition('throttle', operatingState)}</span>
+      </span>
+    )
+  }
+
+  if (control.controlId === 'brake-handle') {
+    const releasePosition = 100 - operatingState.automaticBrakePercent
+    return (
+      <span className="mechanism-slider brake-slider">
+        <span className="slider-captions"><b>APPLY</b><b>RELEASE</b></span>
+        <input
+          className="handle-range brake-range"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value={releasePosition}
+          disabled={!brakeEnabled}
+          aria-label="Automatic brake demo setting"
+          aria-valuetext={controlPosition('brake-handle', operatingState)}
+          onChange={(event) => onAutomaticBrakeChange(100 - Number(event.currentTarget.value))}
+        />
+        <span className="slider-state">{controlPosition('brake-handle', operatingState)}</span>
+      </span>
+    )
+  }
+
   const dynamicBrake = control.controlId === 'dynamic-brake'
-  const applied = brakeControl ? operatingState.brakeReleased : control.controlId === 'throttle' && operatingState.throttleApplied
   return (
-    <span className={`mechanism-slider${brakeControl ? ' brake-slider' : ''}${applied ? brakeControl ? ' released' : ' applied' : ''}`}>
-      <span className="slider-captions"><b>{brakeControl ? 'APPLY' : dynamicBrake ? 'OFF' : 'IDLE'}</b><b>{brakeControl ? 'RELEASE' : dynamicBrake ? 'BRAKE' : 'POWER'}</b></span>
+    <span className="mechanism-slider">
+      <span className="slider-captions"><b>{dynamicBrake ? 'OFF' : 'IDLE'}</b><b>{dynamicBrake ? 'BRAKE' : 'HANDLE'}</b></span>
       <span className="slider-rail"><i /></span>
       <span className="slider-state">{position}</span>
     </span>
@@ -150,7 +214,7 @@ function FactoryWindow({ doorOpen, moving }: { doorOpen: boolean; moving: boolea
   )
 }
 
-function CabScene({ completedControlIds, currentControlId, disabled, motion, operatingState, onControl, onControlHelp }: CabSceneProps) {
+function CabScene({ completedControlIds, currentControlId, disabled, factoryDoorOpen, motion, operatingState, throttleEnabled, brakeEnabled, onControl, onControlHelp, onThrottleChange, onAutomaticBrakeChange }: CabSceneProps) {
   return (
     <div className="cab-scene">
       <div className="cab-toolbar">
@@ -159,7 +223,7 @@ function CabScene({ completedControlIds, currentControlId, disabled, motion, ope
       </div>
 
       <div className="window-bezel">
-        <div className="window-glass"><FactoryWindow doorOpen moving={motion === 'moving'} /></div>
+        <div className="window-glass"><FactoryWindow doorOpen={factoryDoorOpen} moving={motion === 'moving'} /></div>
         <span className="window-reflection" aria-hidden="true" />
         <span className="window-frame-left" aria-hidden="true" />
         <span className="window-frame-right" aria-hidden="true" />
@@ -203,20 +267,41 @@ function CabScene({ completedControlIds, currentControlId, disabled, motion, ope
                 {panel.controls.map((control) => {
                   const isCurrent = currentControlId === control.controlId
                   const isComplete = completedControlIds.includes(control.controlId)
+                  const isAdjustableHandle = control.controlId === 'throttle' || control.controlId === 'brake-handle'
+                  const controlContent = (
+                    <>
+                      <span className="cab-control-top"><span>{control.label}</span></span>
+                      <span className="control-mechanism">
+                        <ControlMechanism
+                          control={control}
+                          operatingState={operatingState}
+                          throttleEnabled={throttleEnabled}
+                          brakeEnabled={brakeEnabled}
+                          onThrottleChange={onThrottleChange}
+                          onAutomaticBrakeChange={onAutomaticBrakeChange}
+                        />
+                      </span>
+                      <span className="control-position"><i className={isComplete ? 'position-on' : ''} />{isComplete ? 'OPERATED / DEMO' : controlPosition(control.controlId, operatingState)}</span>
+                    </>
+                  )
                   return (
                     <div className="cab-control-row" key={control.controlId}>
-                      <button
-                        className={`cab-control ${control.kind}${isCurrent ? ' is-current' : ''}${isComplete ? ' is-complete' : ''}`}
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => onControl(control.controlId)}
-                        aria-label={`${control.label}, ${controlPosition(control.controlId, operatingState)}${isCurrent ? ', highlighted for the current step' : ''}`}
-                        aria-current={isCurrent ? 'step' : undefined}
-                      >
-                        <span className="cab-control-top"><span>{control.label}</span></span>
-                        <span className="control-mechanism"><ControlMechanism control={control} operatingState={operatingState} /></span>
-                        <span className="control-position"><i className={isComplete ? 'position-on' : ''} />{isComplete ? 'OPERATED / DEMO' : controlPosition(control.controlId, operatingState)}</span>
-                      </button>
+                      {isAdjustableHandle ? (
+                        <div className={`cab-control ${control.kind}${isCurrent ? ' is-current' : ''}${isComplete ? ' is-complete' : ''}`} role="group" aria-label={`${control.label}, ${controlPosition(control.controlId, operatingState)}`}>
+                          {controlContent}
+                        </div>
+                      ) : (
+                        <button
+                          className={`cab-control ${control.kind}${isCurrent ? ' is-current' : ''}${isComplete ? ' is-complete' : ''}`}
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => onControl(control.controlId)}
+                          aria-label={`${control.label}, ${controlPosition(control.controlId, operatingState)}${isCurrent ? ', highlighted for the current step' : ''}`}
+                          aria-current={isCurrent ? 'step' : undefined}
+                        >
+                          {controlContent}
+                        </button>
+                      )}
                       <button
                         className="control-help-action"
                         type="button"

@@ -54,4 +54,21 @@ describe('first-movement operating demo', () => {
     expect(resumed.status).toBe('active')
     expect(restarted).toEqual(createInitialLessonState())
   })
+
+  it('finishes the lesson only when the mapped movement reports a stop', () => {
+    let state = reduceLesson(createInitialLessonState(), { type: 'start' })
+    for (const step of demoSteps.slice(0, -1)) {
+      state = reduceLesson(state, { type: 'interact', controlId: step.controlId })
+    }
+
+    expect(state.status).toBe('active')
+    expect(state.stepIndex).toBe(demoSteps.length - 1)
+
+    const completed = reduceLesson(state, { type: 'completeMovement' })
+    expect(completed.status).toBe('complete')
+    expect(completed.motion).toBe('stopped')
+    expect(completed.brakeReleased).toBe(false)
+    expect(completed.history).toHaveLength(demoSteps.length)
+    expect(completed.stepIndex).toBe(demoSteps.length)
+  })
 })

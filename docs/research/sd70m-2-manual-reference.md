@@ -16,4 +16,4 @@ This is an SD70M-2 manual for Canadian National Railways, not an SD70ACe manual.
 
 ## Simulator Use
 
-The current interface labels panels and controls using this SD70M-2 reference and marks the model mismatch in the UI. Its high-level power/start/brake/movement logic is a prototype based on the user's scenario, not an operational procedure. Replace or validate every control and transition against an SD70ACe source before using it for training.
+The current interface labels panels and controls using this SD70M-2 reference and marks the model mismatch in the UI. Its high-level power/start/brake/movement logic is a prototype based on the user's scenario, not an operational procedure. The Muncie factory footprint, outbound track, yard, and test loop are illustrative map geometry, not a surveyed site plan; the simulated mph and 5 mph cap are interface-demo values only. Replace or validate every control and transition against an SD70ACe source before using it for training.

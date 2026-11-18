@@ -68,6 +68,7 @@ export type LessonAction =
   | { type: 'restart' }
   | { type: 'interact'; controlId: DemoControlId }
   | { type: 'review'; stepIndex: number }
+  | { type: 'completeMovement' }
 
 export function createInitialLessonState(): LessonState {
   return {
@@ -102,6 +103,20 @@ export function reduceLesson(state: LessonState, action: LessonAction): LessonSt
 
   if (action.type === 'resume' && state.status === 'paused') {
     return { ...state, status: 'active', feedback: demoSteps[state.stepIndex].instruction }
+  }
+
+  if (action.type === 'completeMovement') {
+    if (state.status !== 'active' || state.stepIndex !== demoSteps.length - 1) return state
+    return {
+      ...state,
+      status: 'complete',
+      stepIndex: demoSteps.length,
+      motion: 'stopped',
+      brakeReleased: false,
+      throttleApplied: false,
+      feedback: 'The locomotive stopped at the marked point. This route is illustrative only.',
+      history: [...state.history, state.stepIndex],
+    }
   }
 
   if (action.type === 'review') {
